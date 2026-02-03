@@ -10,7 +10,7 @@
 
         <!-- Table -->
         <div class="w-full overflow-x-hidden">
-            <table class="min-w-full border border-gray-200 divide-y divide-gray-200 table-fixed">
+            <table class=" min-w-full border border-gray-200 divide-y divide-gray-200 table-fixed">
                 <!-- Table Header -->
                 <thead class="bg-gray-50">
                     <tr>
@@ -20,7 +20,7 @@
                         <th class="w-20 px-2 py-2 text-left text-sm font-semibold text-gray-700">Image</th>
                         <th class="w-20 px-2 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
                         <th class="w-28 px-2 py-2 text-left text-sm font-semibold text-gray-700">updated_at</th>
-                        <th class="w-40 px-2 py-2 text-left text-sm font-semibold text-gray-700 text-right">Actions</th>
+                        <th class="w-40 px-2 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
                     </tr>
                 </thead>
                 <!-- Table Body -->
@@ -73,7 +73,7 @@
                             ({{ $post->updated_at->format('H:i:s') }})
                         </td>
 
-                        <td class="px-2 py-2 text-sm space-x-1 flex justify-end">
+                        <td class="pr-6 pl-2 py-2 text-sm space-x-1 flex justify-between">
                             <!-- Edit Link -->
                             <a href="{{ route('posts.edit', $post) }}" class="text-blue-600 hover:underline">Edit</a>
                             <!-- Show Link -->
