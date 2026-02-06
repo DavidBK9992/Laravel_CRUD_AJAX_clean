@@ -20,6 +20,6 @@ class Post extends Model
     // Slugging route model binding to use post_title instead of id
     public function getRouteKeyName()
     {
-        return 'post_title';
+        return 'id';
     }
 }

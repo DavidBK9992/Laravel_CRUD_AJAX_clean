@@ -1,14 +1,13 @@
 <x-layout>
     <x-header>
         <x-slot name="header">
-            <h2 class="text-2xl font-bold text-gray-900">Edit Post</h2>
+            <h2 class="mt-2 text-2xl font-bold text-gray-900">Edit Post</h2>
             <p class="text-sm text-gray-500">(Update the details below)</p>
         </x-slot>
 
-        <form method="POST" action="{{ route('posts.update', $post) }}" class="space-y-6" enctype="multipart/form-data">
-            @csrf
-            @method('PATCH')
-
+      <form method="POST" action="{{ route('posts.update', $post->id) }}" enctype="multipart/form-data">
+    @csrf
+    @method('PATCH')
             <div class="space-y-4 m-4">
                 <!-- Title -->
                 <div>

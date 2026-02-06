@@ -5,51 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // List all posts
     public function index()
     {
-        // Order Posts by latest to oldest update and id highest to lowest
-        $posts = Post::orderByDesc('updatet_at')->orderByDesc('id')->paginate(9);
-
-        return view('posts.index', [
-            'posts' => $posts,
-        ]);
+        $posts=Post::all();
+        return view('posts.index', compact('posts'));
     }
 
-    /**
-     * Show the form for creating a new post.
-     */
+    // Create post form
     public function create()
     {
         return view('posts.add');
     }
 
-    /**
-     * Display the clicked post.
-     */
-    public function show(Post $post)
-    {
-        // Logic to show a specific post by ID
-        return view('posts.show', [
-            'post' => $post
-        ]);
-    }
-
-    /**
-     * Store a newly created post in storage.
-     */
+    // Store post
     public function store(Request $request)
     {
         $request->validate([
             'post_title' => 'required|string|unique:posts,post_title',
             'post_description' => 'required|string|unique:posts,post_description',
             'post_status' => 'required|in:active,inactive',
-            'image' => 'required|image|mimes:jpg,jpeg,png,gif',
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif,avif,webp',
         ]);
 
         $data = $request->only(['post_title', 'post_description', 'post_status']);
@@ -60,67 +40,170 @@ class PostController extends Controller
 
         Post::create($data);
 
-        return redirect()->route('posts.index')
-            ->with('success', 'Post created successfully.');
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
 
+    // Show chosen post
+    public function show(Post $post)
+    {
+        return view('posts.show', compact('post'));
+    }
 
-    /**
-     * Show the form for editing an existing post.
-     */
-
+    // Form for editing
     public function edit(Post $post)
     {
-        return view('posts.edit', [
-            'post' => $post,
-        ]);
+        return view('posts.edit', compact('post'));
     }
 
-
-    /**
-     * Show the form for updating the specified post.
-     */
-
+    // Update Post
     public function update(Request $request, Post $post)
     {
         $request->validate([
             'post_title' => 'required|string|unique:posts,post_title,' . $post->id,
             'post_description' => 'required|string|unique:posts,post_description,' . $post->id,
             'post_status' => 'required|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,avif,webp',
         ]);
 
         $data = $request->only(['post_title', 'post_description', 'post_status']);
 
-        /**
-         * Handle image upload if a new image is provided
-         */
-
         if ($request->hasFile('image')) {
+            if ($post->image && Storage::disk('public')->exists($post->image)) {
+                Storage::disk('public')->delete($post->image);
+            }
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
 
-        $data['updated_at'] = now();
-
         $post->update($data);
 
-        return redirect()->route('posts.index')
-            ->with('success', 'Post updated successfully.');
+        return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     }
 
-
-    public function destroy(Post $post)
+    // AJAX: DataTables
+    public function getData(Request $request)
     {
-        // Delete image (if available)
-        if ($post->image && Storage::disk('public')->exists($post->image)) {
-            Storage::disk('public')->delete($post->image);
-        }
+    $posts = Post::select(['id', 'post_title', 'post_description', 'post_status', 'image', 'updated_at']);
 
-        // Delete Post ()
-        if ($post->delete()) {
-            return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
-        }
+    return DataTables::of($posts)
+        ->addColumn('image', function($row){
+            if ($row->image) {
+                return '<img src="'.asset("storage/".$row->image).'" class="w-14 h-14 rounded-lg object-cover">';
+            }
+            return '';
+        })
 
-        return redirect()->route('posts.index')->with('error', 'Failed to delete the post.');
+        // Post title
+         ->addColumn('post_title', function($row){
+            
+            // max 2 rows
+            return '<p class="text-md text-gray-700 break-words max-w-[120px] line-clamp-2" title="'.e($row->post_title).'">'
+                    .e($row->post_title).'</p>';
+        })
+        ->filterColumn('post_title', function ($query, $keyword) {
+        $query->where('post_title', 'like', "%{$keyword}%");
+    })
+        ->orderColumn('post_title', 'post_title $1')
+
+        // Post description
+        ->addColumn('post_description', function($row){
+            // max 3 rows
+            return '<p class="text-xs text-gray-500 break-words max-w-[120px] line-clamp-3" title="'.e($row->post_description).'">'
+                    .e($row->post_description).'</p>';
+        })
+        ->filterColumn('post_description', function ($query, $keyword) {
+        $query->where('post_description', 'like', "%{$keyword}%");
+    })
+
+        ->orderColumn('post_description', 'post_description $1')
+
+        // Post Status
+       ->addColumn('post_status', function ($row) {
+
+    $badge = ''; 
+    $button = '<button 
+                class="toggle-status flex items-center justify-center border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100 w-8 h-8"
+                data-id="'.$row->id.'">
+                <img src="change.png" class="w-4 h-4">
+           </button>';
+
+    if ($row->post_status === 'active') {
+    $badge = '<span class="text-sm w-16 text-center inline-flex items-center gap-x-1 text-green-600">
+                <span class="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
+                Active
+              </span>';
+    } elseif ($row->post_status === 'inactive') {
+    $badge = '<span class="text-sm w-16 text-center inline-flex items-center gap-x-1 text-red-600">
+                <span class="h-2 w-2 rounded-full bg-red-500 inline-block"></span>
+                Inactive
+              </span>';
+    } else {
+    return '<span class="inline-flex items-center gap-x-1 text-gray-600">
+                <span class="h-2 w-2 rounded-full bg-gray-500 inline-block"></span>
+                N/A
+            </span>';
+}
+
+// Flex container fixes layout
+return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'</div>';
+
+})
+->filterColumn('post_status', function ($query, $keyword) {
+    $query->where('post_status', 'like', "%{$keyword}%");
+})
+
+->orderColumn('post_status', 'post_status $1')
+
+    // Updated_at 
+      ->addColumn('updated_at', function($row){
+    return '<p class="text-xs text-gray-500 break-words max-w-[120px] line-clamp-3" title="'.e($row->updated_at).'">'
+        . e($row->updated_at->format('d M Y')) 
+        . '<br>' 
+        . e($row->updated_at->format('H:i:s')) 
+        . '</p>';
+        
+})
+->filterColumn('updated_at', function ($query, $keyword) {
+    $query->whereRaw("strftime(updated_at,'%d %b %Y %H:%i:%s') like ?", ["%{$keyword}%"]);
+})
+
+->orderColumn('updated_at', 'updated_at $1')
+
+
+        ->addColumn('action', function($row){
+            $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
+            $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
+            $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
+            return $edit.' '.$show.' '.$delete;
+        })
+        ->rawColumns(['image', 'post_title', 'post_description','post_status', 'updated_at', 'action'])
+        ->make(true);
+}
+
+    // AJAX: Status change
+    public function statusUpdate(Request $request)
+    {
+        $post = Post::findOrFail($request->id);
+        $post->post_status = $post->post_status === 'active' ? 'inactive' : 'active';
+        $post->save();
+
+        return response()->json(['success' => true, 'status' => $post->post_status]);
     }
+
+    // AJAX: Delete Post
+    public function deleteAjax(Request $request)
+{
+    $post = Post::findOrFail($request->id);
+    
+    // Delete image from storage too if available
+    if ($post->image && Storage::disk('public')->exists($post->image)) {
+        Storage::disk('public')->delete($post->image);
+    }
+
+    $post->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Post deleted successfully.' 
+    ]);
+}
 }

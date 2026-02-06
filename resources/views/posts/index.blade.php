@@ -1,137 +1,220 @@
-@props(['status' => 'active', 'inactive', NULL])
-
+@props(['status' => 'active', 'inactive', null])
 
 <x-layout>
     <x-header>
         <x-slot name="header">
-            <h2 class="text-2xl font-bold text-gray-900">Post List</h2>
+            <h2 class="mt-6 text-2xl font-bold text-gray-900">Post List</h2>
             <p class="text-sm text-gray-500">(Show, Edit and Delete)</p>
         </x-slot>
-
         <!-- Table -->
-        <div class="w-full overflow-x-hidden">
-            <table class="shadow-sm my-4 min-w-full border border-gray-200 divide-y divide-gray-200 table-fixed">
+        <div class="w-full overflow-x-auto">
+            <table id="posts-table"
+                class="table table-bordered hover shadow-sm my-4 w-full border border-gray-200 divide-y divide-gray-200">
                 <!-- Table Header -->
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 ">
                     <tr>
-                        <th class="w-8 px-2 py-2 text-left text-sm font-semibold text-gray-700">ID</th>
-                        <th class="w-36 px-2 py-2 text-left text-sm font-semibold text-gray-700">Title</th>
+                        <th class="w-10 px-2 py-2 text-left text-sm font-semibold text-gray-700">ID</th>
+                        <th class="w-30 px-2 py-2 text-left text-sm font-semibold text-gray-700">Title</th>
                         <th class="w-36 px-2 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
                         <th class="w-20 px-2 py-2 text-left text-sm font-semibold text-gray-700">Image</th>
-                        <th class="w-20 px-2 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+                        <th class="px-2 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
                         <th class="w-28 px-2 py-2 text-left text-sm font-semibold text-gray-700">updated_at</th>
                         <th class="w-36 px-4 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
                     </tr>
                 </thead>
-                <!-- Table Body -->
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($posts as $post)
-                    <tr class="hover:bg-gray-50 align-center">
-                        <td class="px-2 py-2 text-sm text-gray-900">{{ $post->id }}</td>
+                <tfoot>
+                    <tr>
+                        <th class="w-8 px-2 py-2 text-left text-sm font-semibold text-gray-700">ID</th>
+                        <th class="w-30 px-2 py-2 text-left text-sm font-semibold text-gray-700">Title</th>
+                        <th class="w-36 px-2 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
+                        <th class="w-20 px-2 py-2 text-left text-sm font-semibold text-gray-700">Image</th>
+                        <th class="px-2 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+                        <th class="w-28 px-2 py-2 text-left text-sm font-semibold text-gray-700">updated_at</th>
+                        <th class="w-36 px-4 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
 
-                        <td class="px-2 py-2 text-sm text-gray-900 break-words">
-                            <p class="font-semibold truncate" title="{{ $post->post_title }}">
-                                {{ Str::limit($post->post_title, 20) }}
-                            </p>
-
-                        </td>
-                        <td class="px-2 py-2 text-sm text-gray-900 break-words">
-
-                            <p class="text-xs text-gray-500 break-words max-w-[120px] max-h-12 overflow-hidden" title="{{ $post->post_description }}">
-                                {{ Str::limit($post->post_description) }}
-                            </p>
-                        </td>
-
-                        <td class="px-2 py-2">
-                            @if ($post->image)
-                            <img src="{{ asset('storage/' . $post->image) }}"
-                                alt="Post Image"
-                                class="min-w-12 w-12 max-w-full rounded-lg object-cover">
-                            @endif
-                        </td>
-
-                        <td class="px-2 py-2 text-sm">
-                            @if ($post->post_status === 'active')
-                            <i>
-                                <span class="inline-flex items-center gap-x-1 text-green-600">
-                                    <span class="h-2 w-2 rounded-full bg-green-500 inline-block"></span> Active
-                                </span>
-                                @elseif ($post->post_status === 'inactive')
-                                <span class="inline-flex items-center gap-x-1 text-red-600">
-                                    <span class="h-2 w-2 rounded-full bg-red-500 inline-block"></span> Inactive
-                                </span>
-                                @else ($post->post_status !== 'active' && $post->post_status !== 'inactive')
-                                <span class="inline-flex items-center gap-x-1 text-gray-600">
-                                    <span class="h-2 w-2 rounded-full bg-gray-500 inline-block"></span> N/A
-                                </span>
-                            </i>
-                            @endif
-
-                        </td>
-                        <td class="px-2 py-2 text-xs text-gray-500">
-                            {{ $post->updated_at->format('d M Y') }} <br>
-                            ({{ $post->updated_at->format('H:i:s') }})
-                        </td>
-
-                        <td class="pr-2 pl-2 py-2 text-sm space-x-1 flex justify-around  items-center">
-                            <!-- Edit Link -->
-                            <a href="{{ route('posts.edit', $post) }}" class="border p-1.5 rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100 border-blue-200">Edit</a>
-                            <!-- Show Link -->
-                            <a href="{{ route('posts.show', $post) }}" class="border p-1.5 rounded-md text-gray-600 bg-green-50 hover:bg-green-100 border-green-300">Show</a>
-                            <!-- Delete Button that opens Delete Confirmation Modal -->
-                            <button type="button"
-                                class="text-red-600 p-1.5 hover:bg-red-100 delete-button border border-red-300 rounded-md bg-red-50"
-                                data-id="{{ $post->id }}"
-                                data-title="{{ $post->post_title }}">
-                                Delete
-                            </button>
-                            <!-- If deletion is successful show message "success" -->
-                            @if (session('success'))
-                            <x-alert type="success" :message="session('success')" />
-                            @endif
-                            <!-- If deletion is NOT successful show message "error" -->
-                            @if (session('error'))
-                            <x-alert type="error" :message="session('error')" />
-                            @endif
-
-                        </td>
                     </tr>
-
-                    @endforeach
-                </tbody>
+                </tfoot>
             </table>
         </div>
-        <!-- Pagination -->
-        <div class="pt-4">
-            {{ $posts->links() }}
-        </div>
+
     </x-header>
     <!-- Delete Confirmation Dialog -->
     <x-form-delete />
-    <!-- Script for handling delete confirmation -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const deleteDialog = document.getElementById('delete-dialog');
-            const deleteForm = document.getElementById('delete-form');
-            const deletePostTitle = document.getElementById('delete-post-title');
-            const cancelBtn = document.getElementById('cancel-delete');
+    <x-alert />
 
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const postTitle = button.dataset.title;
-                    // Using postTitle (slug) instead of id for deleting when button is clicked
-                    deleteForm.action = `/posts/${postTitle}`;
-                    // Shows 
-                    deletePostTitle.textContent = postTitle;
-                    deleteDialog.showModal();
+    <script>
+        $(document).ready(function() {
+            var table = $('#posts-table').DataTable({
+                processing: true,
+                serverSide: true,
+                order: [
+                    [5, "desc"]
+                ],
+                lengthMenu: [10, 25, 50, -1],
+                ajax: "{{ route('posts.data') }}",
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'post_title',
+                        name: 'post_title'
+                    },
+                    {
+                        data: 'post_description',
+                        name: 'post_description'
+                    },
+                    {
+                        data: 'image',
+                        name: 'image',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'post_status',
+                        name: 'post_status'
+                    },
+                    {
+                        data: 'updated_at',
+                        name: 'updated_at'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },
+                ],
+                dom: 'Bfrtip',
+                buttons: [
+                    'csv', 'excel'
+                ],
+
+                // Column specific search filter
+                initComplete: function() {
+                    this.api().columns().every(function() {
+                        let column = this;
+                        let footer = column.footer();
+                        if (!footer) return;
+
+                        let colName = footer.textContent.trim();
+                        const searchableColumns = ['Status'];
+
+                        if (!searchableColumns.includes(colName)) {
+                            footer.innerHTML = ''; // Keine Filter für andere Spalten
+                            return;
+                        }
+
+                        // Select erstellen
+                        let select = document.createElement('select');
+                        let options = ['Active', 'Inactive'];
+
+                        options.forEach(status => {
+                            let opt = document.createElement('option');
+                            opt.value = status;
+                            opt.innerHTML = status;
+                            select.appendChild(opt);
+                        });
+
+                        select.className =
+                            'block w-full rounded-md border border-gray-300 px-2 py-1 text-sm ' +
+                            'focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500';
+
+                        footer.innerHTML = '';
+                        footer.appendChild(select);
+
+                        // Event: Filter bei Auswahländerung
+                        select.addEventListener('change', function() {
+                            column.search(select.value).draw();
+                            console.log(this.value)
+                        });
+                    });
+                }
+
+
+            });
+
+
+
+            // Status toggle
+            $(document).on('click', '.toggle-status', function() {
+                var id = $(this).data('id');
+                // var status = $(this).data('')
+
+                $.ajax({
+                    url: "{{ route('posts.status.update') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            table.ajax.reload(null, false);
+                            alert('Status changed to ' + res.status);
+                        }
+                    }
                 });
             });
 
-            cancelBtn.addEventListener('click', () => {
-                deleteDialog.close();
+            // Delete button -> open Modal
+            $(document).on('click', '.delete-post', function() {
+                const id = $(this).data('id');
+                const title = $(this).data('post_title');
 
+                deleteRow = $(this).closest('tr');
+
+                $('#delete-post-id').val(id);
+                $('#delete-post-title').text(title);
+
+                document.getElementById('delete-dialog').showModal();
             });
+
+
+            // Close Modal
+            $('#cancel-delete').on('click', function() {
+                document.getElementById('delete-dialog').close();
+            });
+
+            // Delete vie AJAX
+            $('#delete-form').on('submit', function(e) {
+                e.preventDefault();
+
+                const id = $('#delete-post-id').val();
+
+                $.ajax({
+                    url: "{{ route('posts.delete.ajax') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id
+                    },
+                    success: function(res) {
+                        if (res.success) {
+
+                            // Delete Row
+                            table.row(deleteRow).remove().draw(false);
+
+                            // Close Modal
+                            document.getElementById('delete-dialog').close();
+
+                            // Success Message
+                            $('body').append(`
+                        <div class="alert alert-success fixed top-5 right-5 z-50">
+                            ${res.message}
+                        </div>
+                    `);
+
+                            setTimeout(() => {
+                                $('.alert').fadeOut(300, function() {
+                                    $(this).remove();
+                                });
+                            }, 3000);
+                        }
+                    }
+                });
+            });
+
         });
     </script>
-
 </x-layout>
