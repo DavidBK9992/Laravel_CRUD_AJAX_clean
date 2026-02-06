@@ -12,8 +12,7 @@ class PostController extends Controller
     // List all posts
     public function index()
     {
-        $posts=Post::all();
-        return view('posts.index', compact('posts'));
+        return view('posts.index');
     }
 
     // Create post form
@@ -34,6 +33,7 @@ class PostController extends Controller
 
         $data = $request->only(['post_title', 'post_description', 'post_status']);
 
+        // If an image is uploaded, store it on the public disk under 'posts' and save path.
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
@@ -67,10 +67,13 @@ class PostController extends Controller
 
         $data = $request->only(['post_title', 'post_description', 'post_status']);
 
+        // If a new image is uploaded, 
+        // delete old image from storage to avoid orphaned files.
         if ($request->hasFile('image')) {
             if ($post->image && Storage::disk('public')->exists($post->image)) {
                 Storage::disk('public')->delete($post->image);
             }
+
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
 
@@ -80,6 +83,8 @@ class PostController extends Controller
     }
 
     // AJAX: DataTables
+    // Return posts data for DataTables server-side processing, 
+    // including HTML rendering for badges, images, and action buttons.
     public function getData(Request $request)
     {
     $posts = Post::select(['id', 'post_title', 'post_description', 'post_status', 'image', 'updated_at']);
@@ -171,14 +176,14 @@ return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'<
 
         ->addColumn('action', function($row){
             if ($row->post_status === 'active'){
-            $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
-             $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
-            $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
+               $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
+               $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
+               $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
                 return $edit.' '.$show.' '.$delete;
             }else{
+               $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
                $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
-            $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
-             return $show.' '.$delete;
+             return $edit.' '.$delete;
             }
         })
         ->rawColumns(['image', 'post_title', 'post_description','post_status', 'updated_at', 'action'])
@@ -186,6 +191,8 @@ return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'<
 }
 
     // AJAX: Status change
+    // AJAX endpoint: update post status without 
+    // page reload and return JSON response.
    public function statusUpdate(Request $request)
 {
     $request->validate([
@@ -206,6 +213,7 @@ return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'<
 
 
     // AJAX: Delete Post
+    // AJAX endpoint: delete post and its image, return JSON response.
     public function deleteAjax(Request $request)
 {
     $post = Post::findOrFail($request->id);

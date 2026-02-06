@@ -56,8 +56,8 @@
                 <div class="hidden lg:flex lg:gap-x-12">
                     <a href="{{ route('home') }}" class="text-sm/6 font-semibold text-gray-900">Home</a>
 
-                    <a href="{{ route('posts.index') }}" class="text-sm/6 font-semibold text-gray-900">Posts</a>
-                    <a href="{{ route('posts.create') }}" class="text-sm/6 font-semibold text-gray-900">Add Post</a>
+                    <a href="{{ route('posts.index') }}" class="text-sm/6 font-semibold text-gray-900">Post List</a>
+                    <a href="{{ route('posts.create') }}" class="text-sm/6 font-semibold text-gray-900">Create</a>
 
 
 

@@ -38,26 +38,17 @@
 
     </x-header>
     <!-- Delete Confirmation Dialog -->
-    <x-form-toggle-status />
+    <x-form-status />
     <x-form-delete />
     <x-alert />
 
     <script>
+        // Initialize DataTable with server-side processing, 
+        // export buttons, pagination, and ordering.
         $(document).ready(function() {
             var table = $('#posts-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('posts.data') }}",
-                columns: [ /* ... */ ],
-                dom: 'Blfrtip', // Wichtig: l = page length
-                buttons: ['csv', 'excel'],
-                lengthMenu: [
-                    [10, 20, 50, -1],
-                    [10, 20, 50, "All"]
-                ],
-                order: [
-                    [5, 'desc']
-                ],
                 ajax: "{{ route('posts.data') }}",
                 columns: [{
                         data: 'id',
@@ -92,9 +83,19 @@
                         searchable: false
                     },
                 ],
+                dom: 'Blfrtip',
+                buttons: ['csv', 'excel'],
+                lengthMenu: [
+                    [10, 20, 50, -1],
+                    [10, 20, 50, "All"]
+                ],
+                order: [
+                    [5, 'desc']
+                ],
 
 
-                // Column specific search filter
+
+                // Add custom dropdown filter only for Status column.
                 initComplete: function() {
                     this.api().columns().every(function() {
                         let column = this;
@@ -130,13 +131,12 @@
                         // Event: Filter for change of selection of status
                         select.addEventListener('change', function() {
                             column.search(select.value).draw();
-                            console.log(this.value)
                         });
                     });
                 }
             });
 
-            // Open Status Modal
+            // Open status modal and populate current status for selected post.
             $(document).on('click', '.toggle-status', function() {
                 const id = $(this).data('id');
                 const status = $(this).data('status'); // active | inactive
@@ -157,13 +157,12 @@
             });
 
             // Set Status
+            // Send AJAX request to update post status; 
+            // reload DataTable row, show success alert.
             $('#submit-status').on('click', function() {
                 const id = $('#toggle-status-id').val();
                 const status = $('#new-status').val();
                 document.getElementById('status-dialog').showModal();
-                console.log(status);
-
-
                 $.ajax({
                     url: "{{ route('posts.status.update') }}",
                     type: "POST",
@@ -194,7 +193,7 @@
                 });
             });
 
-            // Delete button -> open Modal
+            // Open delete confirmation modal and display post title.
             $(document).on('click', '.delete-post', function() {
                 const id = $(this).data('id');
                 const title = $(this).data('post_title');
@@ -211,6 +210,8 @@
             });
 
             // Delete vie AJAX
+            // Send AJAX request to delete post; remove row from DataTable, 
+            // close modal, show alert.
             $('#delete-form').on('submit', function(e) {
                 e.preventDefault();
 
@@ -237,6 +238,7 @@
                             document.getElementById('delete-dialog').close();
 
                             // Success Message
+                            // Success alerts fade out automatically after 3 seconds.
                             $('body').append(`
                         <div class="alert alert-success fixed top-5 right-5 z-50">
                             ${res.message}
