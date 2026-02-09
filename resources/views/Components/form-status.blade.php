@@ -14,8 +14,8 @@
                <select id="new-status"
                    class="block w-full rounded-md border border-gray-300 px-2 py-1 text-sm
                     focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                   <option value="active">Active</option>
-                   <option value="inactive">Inactive</option>
+                   <option value="1">Active</option>
+                   <option value="0">Inactive</option>
                </select>
            </div>
            <div class="mt-6 flex justify-end gap-2">

@@ -103,50 +103,38 @@
                         if (!footer) return;
 
                         let colName = footer.textContent.trim();
-                        const searchableColumns = ['Status'];
-
-                        if (!searchableColumns.includes(colName)) {
-                            footer.innerHTML = ''; // No Filter for other columns
+                        if (colName !== 'Status') {
+                            footer.innerHTML = '';
                             return;
                         }
 
-                        // Make Select
                         let select = document.createElement('select');
-                        let options = ['Active', 'Inactive'];
-
-                        options.forEach(status => {
-                            let opt = document.createElement('option');
-                            opt.value = status;
-                            opt.innerHTML = status;
-                            select.appendChild(opt);
-                        });
-
                         select.className =
-                            'block w-full rounded-md border border-gray-300 px-2 py-1 text-sm ' +
-                            'focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500';
+                            'block w-full rounded border px-2 py-1 text-sm font-semibold';
+                        select.innerHTML = '<option value="">All</option>' +
+                            '<option value="1">Active</option>' +
+                            '<option value="0">Inactive</option>';
 
                         footer.innerHTML = '';
                         footer.appendChild(select);
 
-                        // Event: Filter for change of selection of status
                         select.addEventListener('change', function() {
                             column.search(select.value).draw();
                         });
                     });
                 }
+
             });
 
             // Open status modal and populate current status for selected post.
             $(document).on('click', '.toggle-status', function() {
                 const id = $(this).data('id');
-                const status = $(this).data('status'); // active | inactive
-
+                const status = $(this).data('status');
                 $('#toggle-status-id').val(id);
                 $('#toggle-status-title').text(id);
 
                 // Set current status as selected option in modal
-                $('#new-status').val(status);
-
+                $('#new-status').val(status === 'active' ? '1' : '0');
                 document.getElementById('status-dialog').showModal();
             });
 
@@ -196,10 +184,9 @@
             // Open delete confirmation modal and display post title.
             $(document).on('click', '.delete-post', function() {
                 const id = $(this).data('id');
-                const title = $(this).data('post_title');
 
                 $('#delete-post-id').val(id);
-                $('#delete-post-title').text(title);
+                $('#post-id').text(id);
 
                 document.getElementById('delete-dialog').showModal();
             });

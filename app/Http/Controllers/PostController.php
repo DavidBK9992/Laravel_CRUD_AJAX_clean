@@ -31,9 +31,12 @@ class PostController extends Controller
             'image' => 'required|image|mimes:jpg,jpeg,png,gif,avif,webp',
         ]);
 
-        $data = $request->only(['post_title', 'post_description', 'post_status']);
+        $data = $request->only(['post_title', 'post_description']);
 
-        // If an image is uploaded, store it on the public disk under 'posts' and save path.
+        // Map active/inactive in boolean
+        $data['post_status'] = $request->post_status === 'active' ? 1 : 0;
+
+        // Save Image
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
@@ -65,8 +68,10 @@ class PostController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,avif,webp',
         ]);
 
-        $data = $request->only(['post_title', 'post_description', 'post_status']);
+        $data = $request->only(['post_title', 'post_description']);
 
+        // Map active/inactive in boolean
+        $data['post_status'] = $request->post_status === 'active' ? 1 : 0;
         // If a new image is uploaded, 
         // delete old image from storage to avoid orphaned files.
         if ($request->hasFile('image')) {
@@ -121,40 +126,38 @@ class PostController extends Controller
 
         ->orderColumn('post_description', 'post_description $1')
 
-        // Post Status
+        // Post status
        ->addColumn('post_status', function ($row) {
+    $statusText = $row->post_status ? 'active' : 'inactive';
 
-    $badge = ''; 
-    $button = '<button 
-                class="toggle-status flex items-center justify-center border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100 w-8 h-8"
-                data-id="'.$row->id.'" data-status="'.$row->post_status.'">
-                <img src="change.png" class="w-4 h-4">
-           </button>';
+    // Badge with fixed min-width, so that it doesn´t get moved around
+    $badge = $row->post_status 
+        ? '<span class="text-green-600 inline-flex items-center gap-x-1 min-w-[70px]">
+               <span class="h-2 w-2 rounded-full bg-green-500"></span>Active
+           </span>'
+        : '<span class="text-red-600 inline-flex items-center gap-x-1 min-w-[70px]">
+               <span class="h-2 w-2 rounded-full bg-red-500"></span>Inactive
+           </span>';
 
-    if ($row->post_status === 'active') {
-    $badge = '<span class="text-sm w-16 text-center inline-flex items-center gap-x-1 text-green-600">
-                <span class="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
-                Active
-              </span>';
-    } elseif ($row->post_status === 'inactive') {
-    $badge = '<span class="text-sm w-16 text-center inline-flex items-center gap-x-1 text-red-600">
-                <span class="h-2 w-2 rounded-full bg-red-500 inline-block"></span>
-                Inactive
-              </span>';
-    } else {
-    return '<span class="inline-flex items-center gap-x-1 text-gray-600">
-                <span class="h-2 w-2 rounded-full bg-gray-500 inline-block"></span>
-                N/A
-            </span>';
-}
+    // Button right, always with the same size
+    $button = '<button class="ml-2 toggle-status flex items-center justify-center w-8 h-8 rounded border border-gray-300 bg-gray-50 hover:bg-gray-100"
+                data-id="'.$row->id.'" data-status="'.$statusText.'">
+                    <img src="'.asset("change.png").'" class="w-4 h-4">
+               </button>';
 
-// Flex container fixes layout
-return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'</div>';
-
+    return '<div class="flex items-center">'.$badge.$button.'</div>';
 })
+
+
 ->filterColumn('post_status', function ($query, $keyword) {
-    $query->where('post_status', 'like', "%{$keyword}%");
+    if ($keyword === '1') {
+        $query->where('post_status', 1);
+    } elseif ($keyword === '0') {
+        $query->where('post_status', 0);
+    }
 })
+
+
 
 ->orderColumn('post_status', 'post_status $1')
 
@@ -175,15 +178,16 @@ return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'<
 
 
         ->addColumn('action', function($row){
-            if ($row->post_status === 'active'){
+            if ($row->post_status === 0){
                $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
                $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
-               $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
-                return $edit.' '.$show.' '.$delete;
+                return $edit.'  '.$delete;
             }else{
                $edit = '<a href="'.route('posts.edit', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Edit</a>';
                $delete = '<button data-id="'.$row->id.'" data-post_title="'.e($row->post_title).'" class="delete-post border p-1.5 rounded-md text-red-600 bg-red-50 hover:bg-red-100">Delete</button>';
-             return $edit.' '.$delete;
+                              $show = '<a href="'.route('posts.show', $row->id).'" class="border p-1.5 rounded-md text-gray-700 bg-gray-50 hover:bg-blue-100">Show</a>';
+
+             return $edit.''.$show.' '.$delete;
             }
         })
         ->rawColumns(['image', 'post_title', 'post_description','post_status', 'updated_at', 'action'])
@@ -193,23 +197,24 @@ return '<div class="flex items-center justify-between gap-2">'.$badge.$button.'<
     // AJAX: Status change
     // AJAX endpoint: update post status without 
     // page reload and return JSON response.
-   public function statusUpdate(Request $request)
+public function statusUpdate(Request $request)
 {
     $request->validate([
         'id' => 'required|exists:posts,id',
-        'status' => 'required|in:active,inactive',
+        'status' => 'required|in:1,0', // <-- numeric string
     ]);
 
     $post = Post::findOrFail($request->id);
-    $post->post_status = $request->status;
+    $post->post_status = (int) $request->status; // <-- save as boolean/int
     $post->save();
 
     return response()->json([
         'success' => true,
         'message' => 'Status successfully saved!',
-        'status' => $post->post_status,
+        'status' => $post->post_status ? 'active' : 'inactive', // for UI
     ]);
 }
+
 
 
     // AJAX: Delete Post

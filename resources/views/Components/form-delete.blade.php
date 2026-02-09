@@ -9,8 +9,8 @@
         </h3>
 
         <p class="mt-2 text-sm text-gray-500">
-            Are you sure you want to delete Post with title:
-            <strong class="italic" id="delete-post-title"></strong> ❓
+            Are you sure you want to delete Post with ID:
+            <strong class="italic" id="post-id"></strong> ❓
         </p>
 
         <div class="mt-6 flex justify-end gap-2">

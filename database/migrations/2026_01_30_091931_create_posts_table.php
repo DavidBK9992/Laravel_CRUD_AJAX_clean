@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('post_title')->unique();
             $table->text('post_description')->unique();
-            $table->string('post_status')->nullable(); // leer möglich
-            $table->string('image')->nullable(); // optional
-            $table->timestamps()->timezone_location_get('UTC');
+ $table->boolean('post_status')->default(0); // 0 = inactive, 1 = active   
+             $table->string('image')->nullable(); 
+            $table->timestamps();
         });
     }
 

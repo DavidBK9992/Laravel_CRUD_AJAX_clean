@@ -22,4 +22,9 @@ class Post extends Model
     {
         return 'id';
     }
+    // Status returns active/inactive
+      public function getStatusTextAttribute()
+    {
+        return $this->post_status ? 'active' : 'inactive';
+    }
 }
