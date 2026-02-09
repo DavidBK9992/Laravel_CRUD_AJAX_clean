@@ -53,17 +53,12 @@
                         </svg>
                     </button>
                 </div>
-                <div class="hidden lg:flex lg:gap-x-12">
+
+                <div class="hidden gap-4  lg:flex lg:flex-1 lg:justify-end">
                     <a href="{{ route('home') }}" class="text-sm/6 font-semibold text-gray-900">Home</a>
 
                     <a href="{{ route('posts.index') }}" class="text-sm/6 font-semibold text-gray-900">Post List</a>
-                    <a href="{{ route('posts.create') }}" class="text-sm/6 font-semibold text-gray-900">Create</a>
-
-
-
-                </div>
-                <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                    <a href="/contact" class="text-sm/6 font-semibold text-gray-900">Contact <span
+                    <a href="{{ route('posts.create') }}" class="text-sm/6 font-semibold text-gray-900">Create <span
                             aria-hidden="true">&rarr;</span></a>
                 </div>
             </nav>

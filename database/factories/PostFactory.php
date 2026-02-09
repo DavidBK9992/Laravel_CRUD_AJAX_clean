@@ -4,7 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use \Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
@@ -12,6 +13,7 @@ use \Illuminate\Support\Str;
 class PostFactory extends Factory
 {
     protected $model = Post::class;
+
     /**
      * Define the model's default state.
      *
@@ -19,10 +21,18 @@ class PostFactory extends Factory
      */
     public function definition(): array
     {
+        // 🔹 Use existing images from storage/app/public/posts
+        $images = Storage::disk('public')->files('posts');
+
         return [
             'post_title' => Str::limit(fake()->sentence(), 50, ''),
             'post_description' => Str::limit(fake()->text(200), 200, ''),
             'post_status' => 1,
+
+            // 🔹 Pick a random existing image (no download, no copy)
+            'image' => !empty($images)
+                ? fake()->randomElement($images)
+                : null,
         ];
     }
 }
