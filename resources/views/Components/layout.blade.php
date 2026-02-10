@@ -3,11 +3,12 @@
  look and feel across all pages -->
 
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-white">
+<html lang="en" class="h-full bg-stone-50">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Layout</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
     <!-- DataTables CSS -->
@@ -32,14 +33,15 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 
-<body class="h-full bg-white">
+<body class="h-full bg-stone-50">
     <div class=" h-full">
-        <header class="bg-white border-b border-gray-200 shadow-sm absolute border- inset-x-0 top-0 z-50">
-            <nav aria-label="Global" class="flex items-center justify-between p-6 lg:px-8">
+        <header id="main-header"
+            class="bg-white fixed border-b border-gray-200 shadow-sm fixed border- inset-x-0 top-0 z-50 transition-transform duration-300">
+            <nav aria-label="Global" class="flex items-center justify-between p-2 lg:px-8">
                 <div class="flex lg:flex-1">
                     <a href="{{ route('home') }}" class="-m-1.5 p-1.5">
                         <span class="sr-only">Your Company</span>
-                        <img src="/logo.png" alt="" class="h-12 w-auto" />
+                        <img src="/logo.png" alt="" class="h-16 w-auto" />
                     </a>
                 </div>
                 <div class="flex lg:hidden">
@@ -112,4 +114,31 @@
         <!-- Here will be the content of each page -->
         {{ $slot }}
     </div>
+    <script>
+        let lastScroll = 0;
+        const header = document.getElementById('main-header');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > lastScroll && currentScroll > 50) {
+                // scroll down → remove header from view
+                header.style.transform = "translateY(-100%)";
+            } else {
+                // scroll up → show header again
+                header.style.transform = "translateY(0)";
+            }
+
+            lastScroll = currentScroll;
+        });
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content')
+            }
+        });
+    </script>
+
 </body>

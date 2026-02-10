@@ -126,4 +126,10 @@ return [
 
     'pagination' => 9,
 
+
+'aliases' => [
+    // ...
+    'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+],
+
 ];

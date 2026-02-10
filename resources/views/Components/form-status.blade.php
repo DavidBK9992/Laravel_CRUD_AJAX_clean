@@ -13,7 +13,7 @@
            <div class="mt-4">
                <select id="new-status"
                    class="block w-full rounded-md border border-gray-300 px-2 py-1 text-sm
-                    focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                    focus:outline-none focus:ring-1 focus:ring-gray-500 focus:border-gray-500">
                    <option value="1">Active</option>
                    <option value="0">Inactive</option>
                </select>
@@ -22,7 +22,7 @@
                <button type="button" id="cancel-status" class="px-4 py-2 rounded-md bg-gray-100">
                    Cancel
                </button>
-               <button type="button" id="submit-status" class="px-4 py-2 rounded-md bg-indigo-600 text-white">
+               <button type="button" id="submit-status" class="px-4 py-2 rounded-md bg-green-600 text-white">
                    Save
                </button>
            </div>

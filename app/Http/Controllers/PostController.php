@@ -6,101 +6,130 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\DataTables\PostDataTable;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use App\Http\Requests\UpdatePostStatusRequest;
 
 class PostController extends Controller
 {
-    public function index() {
-        return view('posts.index');
+    /**
+     * Display a listing of posts with DataTable
+     * @param PostDataTable $dataTable
+     * @return \Illuminate\View\View
+     */
+    public function index(PostDataTable $dataTable)
+    {
+        return $dataTable->render('posts.index'); // Blade + Ajax are automatically generated
     }
 
-    public function create() {
+    /**
+     * Get JSON data for DataTable
+     * @param PostDataTable $dataTable
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getData(PostDataTable $dataTable)
+    {
+        // Gives the JSON-answer from DataTables
+        return $dataTable->ajax();
+    }
+
+    /**
+     * Show create post form
+     * @return \Illuminate\View\View
+     */
+    public function create()
+    {
         return view('posts.add');
     }
 
-    public function store(Request $request) {
-        $request->validate([
-            'post_title' => 'required|string|unique:posts,post_title',
-            'post_description' => 'required|string|unique:posts,post_description',
-            'post_status' => 'required|in:active,inactive',
-            'image' => 'required|image|mimes:jpg,jpeg,png,gif,avif,webp',
-        ]);
-
-        $data = $request->only(['post_title', 'post_description']);
-        $data['post_status'] = $request->post_status === 'active' ? 1 : 0;
-
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('posts', 'public');
-        }
+    /**
+     * Store a newly created post
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(StorePostRequest $request)
+    {
+        $data = $request->only(['post_title','post_description']);
+        $data['post_status'] = $request->post_status === 'active';
+        $data['image'] = $request->file('image')->store('posts', 'public');
 
         Post::create($data);
 
-        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+        return redirect()->route('posts.index');
     }
 
-    public function show(Post $post) {
+    /**
+     * Display the specified post
+     * @param Post $post
+     * @return \Illuminate\View\View
+     */
+    public function show(Post $post)
+    {
         return view('posts.show', compact('post'));
     }
 
-    public function edit(Post $post) {
+    /**
+     * Show edit form for the specified post
+     * @param Post $post
+     * @return \Illuminate\View\View
+     */
+    public function edit(Post $post)
+    {
         return view('posts.edit', compact('post'));
     }
 
-    public function update(Request $request, Post $post) {
-        $request->validate([
-            'post_title' => 'required|string|unique:posts,post_title,' . $post->id,
-            'post_description' => 'required|string|unique:posts,post_description,' . $post->id,
-            'post_status' => 'required|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,avif,webp',
-        ]);
-
-        $data = $request->only(['post_title', 'post_description']);
-        $data['post_status'] = $request->post_status === 'active' ? 1 : 0;
+    /**
+     * Update the specified post
+     * @param Request $request
+     * @param Post $post
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(UpdatePostRequest $request, Post $post)
+    {
+        $data = $request->only(['post_title','post_description']);
+        $data['post_status'] = $request->post_status === 'active';
 
         if ($request->hasFile('image')) {
-            if ($post->image && Storage::disk('public')->exists($post->image)) {
-                Storage::disk('public')->delete($post->image);
-            }
+            Storage::disk('public')->delete($post->image);
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
 
         $post->update($data);
 
-        return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
+        return redirect()->route('posts.index');
     }
 
-    public function getData(Request $request) {
-        return PostDataTable::make();
-    }
+    /**
+     * Update post status via AJAX
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+ public function statusUpdate(UpdatePostStatusRequest $request)
+{
+    Post::where('id', $request->id)
+        ->update(['post_status' => $request->status]);
 
-    public function statusUpdate(Request $request) {
-        $request->validate([
-            'id' => 'required|exists:posts,id',
-            'status' => 'required|in:1,0',
-        ]);
+    return response()->json([
+        'success' => true,
+        'message' => 'Status updated successfully' 
+    ]);
+}
 
-        $post = Post::findOrFail($request->id);
-        $post->post_status = (int)$request->status;
-        $post->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status successfully saved!',
-            'status' => $post->post_status ? 'active' : 'inactive',
-        ]);
-    }
+    /**
+     * Delete post via AJAX
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+   public function deleteAjax(Request $request)
+{
+    $post = Post::findOrFail($request->id);
+    Storage::disk('public')->delete($post->image);
+    $post->delete();
 
-    public function deleteAjax(Request $request) {
-        $post = Post::findOrFail($request->id);
-
-        if ($post->image && Storage::disk('public')->exists($post->image)) {
-            Storage::disk('public')->delete($post->image);
-        }
-
-        $post->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Post deleted successfully.'
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Post deleted successfully' 
+    ]);
+}
 }
