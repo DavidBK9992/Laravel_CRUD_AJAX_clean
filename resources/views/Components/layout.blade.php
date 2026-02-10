@@ -14,7 +14,6 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-
     <!-- jQuery & DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -24,13 +23,6 @@
     <!-- Tailwind  -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
-    <!-- Alpine.js  -->
-    <script src="//unpkg.com/alpinejs" defer></script>
-    <!-- Bootstrap  -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 
 <body class="h-full bg-stone-50">
@@ -106,10 +98,10 @@
         </header>
         <hr>
         @if (session('success'))
-            < x - alert type = "success": message = "session('success')" />
+            <x-alert type = "success": message = "session('success')" />
         @endif
         @if (session('error'))
-            < x - alert type = "error": message = "session('error')" />
+            <x-alert type = "error": message = "session('error')" />
         @endif
         <!-- Here will be the content of each page -->
         {{ $slot }}

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('post_title')->unique();
-            $table->text('post_description')->unique();
- $table->boolean('post_status')->default(0); // 0 = inactive, 1 = active   
+            $table->text('post_description');
+            $table->boolean('post_status')->default(0); // 0 = inactive, 1 = active   
              $table->string('image')->nullable(); 
             $table->timestamps();
         });

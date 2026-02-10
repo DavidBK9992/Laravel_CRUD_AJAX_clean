@@ -74,5 +74,6 @@
                 </a>
             </div>
         </form>
+        <x-alert />
     </x-header>
 </x-layout>

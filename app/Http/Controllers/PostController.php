@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\DataTables\PostDataTable;
+use App\Http\Requests\DeletePostRequest;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Requests\UpdatePostStatusRequest;
@@ -55,7 +56,8 @@ class PostController extends Controller
 
         Post::create($data);
 
-        return redirect()->route('posts.index');
+          return redirect()->route('posts.index')
+                     ->with('success', 'Post updated successfully!');
     }
 
     /**
@@ -96,7 +98,8 @@ class PostController extends Controller
 
         $post->update($data);
 
-        return redirect()->route('posts.index');
+           return redirect()->route('posts.index')
+                     ->with('success', 'Post updated successfully!');
     }
 
     /**
@@ -121,9 +124,10 @@ class PostController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-   public function deleteAjax(Request $request)
+   public function deleteAjax(DeletePostRequest $request)
 {
-    $post = Post::findOrFail($request->id);
+     $data = $request->validated();
+    $post = Post::findOrFail($data['id']);
     Storage::disk('public')->delete($post->image);
     $post->delete();
 
