@@ -20,7 +20,6 @@
                         @enderror
                     </div>
                 </div>
-
                 <!-- Description -->
                 <div>
                     <label for="post_description" class="block text-sm font-medium text-gray-900">Description</label>
@@ -44,7 +43,6 @@
                         @enderror
                     </div>
                 </div>
-
                 <!-- Status -->
                 <div>
                     <label for="post_status" class="block text-sm font-medium text-gray-900">Status</label>
@@ -62,13 +60,11 @@
                     @enderror
                 </div>
             </div>
-
             <!-- Buttons -->
             <div class="m-4 flex justify-start items-center gap-x-4 mt-6">
                 <button type="submit" type="submit"
                     class="rounded-md bg-gray-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs focus-visible:outline-gray-600">Add
                     Post</button>
-
                 <a href="{{ route('posts.index') }}" class="text-sm font-semibold text-gray-900 hover:underline">
                     Cancel
                 </a>

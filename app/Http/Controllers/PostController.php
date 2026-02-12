@@ -57,7 +57,7 @@ class PostController extends Controller
         Post::create($data);
 
           return redirect()->route('posts.index')
-                     ->with('success', 'Post updated successfully!');
+                     ->with('success', 'Post created successfully!');
     }
 
     /**

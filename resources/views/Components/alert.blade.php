@@ -4,13 +4,11 @@
         role="alert" id="success-alert">
         {{ session('success') }}
     </div>
-
     <!-- Auto close + OnClick close -->
     <script>
         function closeAlert() {
             document.getElementById('success-alert').style.display = "none";
         }
-
         // Auto hide after 3 seconds
         setTimeout(() => {
             closeAlert();

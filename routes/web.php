@@ -11,8 +11,10 @@ Route::get('/posts/data', [PostController::class, 'getData'])->name('posts.data'
 Route::post('/posts/status-update', [PostController::class, 'statusUpdate'])->name('posts.status.update');
 Route::post('/posts/delete-ajax', [PostController::class, 'deleteAjax'])->name('posts.delete.ajax');
 
-// Then resource routes
+// Resource routes
 Route::resource('posts', PostController::class);
+
+// Contact Page
 Route::view('/contact', 'contact')->name('contact');
 
 

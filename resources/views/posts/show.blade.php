@@ -9,7 +9,6 @@
                 <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight break-words">
                     {{ $post->post_title }}
                 </h1>
-
                 <!-- Meta -->
                 <div class="mt-4 flex items-center justify-center gap-4 text-sm text-gray-500">
                     <span>
@@ -21,7 +20,6 @@
                     </span>
                 </div>
             </header>
-
             <!-- Image -->
             @if ($post->image)
                 <div class="mb-10 flex justify-center">
@@ -29,17 +27,14 @@
                         class="w-full max-h-[420px] object-cover rounded-xl shadow-sm">
                 </div>
             @endif
-
             <!-- Content -->
             <div class="prose prose-gray max-w-none text-gray-700 leading-relaxed">
                 <p class="whitespace-pre-line break-words">
                     {{ $post->post_description }}
                 </p>
             </div>
-
             <!-- Divider -->
             <div class="my-10 border-t"></div>
-
             <!-- Footer Actions -->
             <footer class="flex items-center justify-between text-sm text-gray-500">
                 <span>
@@ -48,7 +43,6 @@
                         {{ $post->updated_at->format('d M Y, H:i') }}
                     </span>
                 </span>
-
                 <a href="{{ route('posts.index') }}" class="font-semibold text-gray-700 hover:text-gray-900">
                     ← Back to posts
                 </a>

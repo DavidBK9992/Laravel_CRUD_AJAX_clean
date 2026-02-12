@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
+use Yajra\DataTables\Html\Options\Plugins\RowReorder;
 use Yajra\DataTables\Services\DataTable;
 
 class PostDataTable extends DataTable
@@ -26,17 +27,14 @@ class PostDataTable extends DataTable
                      ? '<div class="flex justify-center items-center"><img src="' . asset("storage/" . $row->image) . '" class="w-14 h-14 rounded-lg object-cover"></div>'
                         : '';
             })
-
             ->editColumn('post_title', function ($row) {
                 return '<p class="text-sm text-gray-700 break-words max-w-[120px]  font-medium line-clamp-2" title="' . e($row->post_title) . '">' . e($row->post_title) . '</p>';
             })
-
             ->editColumn('post_description', function ($row) {
                 return '<p class="text-xs text-gray-500 break-words max-w-[120px] line-clamp-3" title="' . e($row->post_description) . '">' . e($row->post_description) . '</p>';
             })
-
             ->editColumn('post_status', function ($row) {
-
+            // Showing Status active or inactive 
             if ($row->post_status) {
             // ACTIVE – pulsing / radiating
             $badge = '
@@ -68,19 +66,14 @@ class PostDataTable extends DataTable
 
             return '<div class="flex items-center">' . $badge . $button . '</div>';
             })
-
-
             ->editColumn('updated_at', function ($row) {
                 return '<p class="text-xs text-gray-500">' . $row->updated_at->format('d M Y H:i:s') . '</p>';
             })
-
            ->editColumn('action', function ($row) {
             $html = '<div class="flex gap-2 justify-center items-center">';
-
             $html .= '<a href="' . route('posts.edit', $row->id) . '" class="border rounded p-2 bg-gray-50 hover:bg-green-50 flex items-center justify-center">
                             <img src="' . asset("edit.png") . '" class="w-4 h-4">
                      </a>';
-
              if ($row->post_status) {
             $html .= '<a href="' . route('posts.show', $row->id) . '" class="border rounded p-2 bg-gray-50 hover:bg-white flex items-center justify-center">
                             <img src="' . asset("show.png") . '" class="w-4 h-4">
@@ -90,11 +83,9 @@ class PostDataTable extends DataTable
                              <img src="' . asset("show.png") . '" class="w-4 h-4">
                       </a>';
     }
-
             $html .= '<button data-id="' . $row->id . '" data-post_title="' . e($row->post_title) . '" class="delete-post border p-2 rounded text-red-600 bg-red-50 hover:bg-red-100 flex items-center justify-center">
                             Delete
                      </button>';
-
             return $html . '</div>';
     })
 
@@ -126,7 +117,7 @@ class PostDataTable extends DataTable
         ->minifiedAjax()
         ->orderBy(5)
         ->parameters([
-            "responsive"=> true,
+        'responsive' => true,
         'dom' => '<"flex justify-between mb-2"<"length-menu"l><"buttons"B>>frtip',
         'buttons' => ['csv', 'excel'],
         'initComplete' => 'function() {
